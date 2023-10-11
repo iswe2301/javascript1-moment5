@@ -4,20 +4,15 @@
 
 /*  Delar till ej obligatorisk funktionalitet, som kan ge poäng för högre betyg
 *   Radera rader för funktioner du vill visa på webbsidan. */
-document.getElementById("player").style.display = "none";      // Radera denna rad för att visa musikspelare
-document.getElementById("shownumrows").style.display = "none"; // Radera denna rad för att visa antal träffar
+// document.getElementById("player").style.display = "none";      // Radera denna rad för att visa musikspelare
+// document.getElementById("shownumrows").style.display = "none"; // Radera denna rad för att visa antal träffar
 
 /* Här under börjar du skriva din JavaScript-kod */
 
 // Variabler
 let mainnavEl = document.getElementById("mainnav");
-let numrowsEl = document.getElementById("numrows");
-let logoEl = document.getElementById("logo");
-
 
 // Händelsehanterare
-numrowsEl.addEventListener("change", changeNumrows, false);
-logoEl.addEventListener("click", loadFront, false);
 window.onload = init;
 
 // Initierings-funktion
@@ -27,37 +22,31 @@ function init() {
 
 }
 
-let xhttp = new XMLHttpRequest();
-xhttp.onreadystatechange = function () {
-    if (this.readyState == 4 && this.status == 200) {
-        let content = this.responseXML;
-        let channels = content.querySelectorAll("channel");
-
-        // Skapar en lista för att lagra kanalnamn
-        let channelNames = [];
-
-        // Loopar igenom kanalerna och hämta namnen
-        channels.forEach((channel) => {
-            let name = channel.getAttribute("name");
-            channelNames.push(name);
-        });
-        // Uppdaterar webbsidan med kanalnamnen
-        let output = channelNames.map(name => `<li>${name}</li>`).join("");
-        document.getElementById("mainnavlist").innerHTML = output;
-    }
-};
-xhttp.open("GET", "http://api.sr.se/v2/channels/", true);
-xhttp.send();
-
-
+// Funktion för att hämta data från webbtjänst
 function getChannels() {
+    const url = "https://api.sr.se/v2/channels/?format=json&size=52"
 
+    // Anropar webbtjänsten genom fetch-API. Hämtar url, ger tillbaka svaret i json.
+    fetch(url)
+        .then(response => response.json())
+        .then(data => displayChannelNames(data.channels))
+        .catch(error => console.log(error));
 }
 
-function changeNumrows() {
+// Funktion för att ta emot och skriva ut kanalernas namn
+function displayChannelNames(channels) {
+    // Loopar igenom och skriver ut till DOM
+    channels.forEach(channel => {
+        // Utskriftsformat
+        let newListEl = document.createElement("li");
+        let newListText = document.createTextNode(channel.name);
+        newListText.addEventListener("click", displayPrograms(), false);
 
+        newListEl.appendChild(newListText);
+        mainnavEl.appendChild(newListEl);
+    });
 }
 
-function loadFront() {
+function displayPrograms() {
 
 }
