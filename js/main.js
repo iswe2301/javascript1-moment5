@@ -1,20 +1,21 @@
-// Denna fil ska innehålla din lösning till uppgiften (moment 6).
+/* Isa Westling, lösning till uppgift 5 */
 
 "use strict";
 
-/*  Delar till ej obligatorisk funktionalitet, som kan ge poäng för högre betyg
-*   Radera rader för funktioner du vill visa på webbsidan. */
-// document.getElementById("player").style.display = "none";      // Radera denna rad för att visa musikspelare
-// document.getElementById("shownumrows").style.display = "none"; // Radera denna rad för att visa antal träffar
-
-/* Här under börjar du skriva din JavaScript-kod */
-
-// Variabler (lagrar DOM-element)
+// Variabler (lagrar element)
 let mainnavlistEl = document.getElementById("mainnavlist");
 let infoEl = document.getElementById("info");
+let playChannelEl = document.getElementById("playchannel");
+let playButtonEl = document.getElementById("playbutton");
+let radioPlayerEl = document.getElementById("radioplayer");
+let numRowsEl = document.getElementById("numrows");
+let listItems = []; // Tom array för att lägga in li-element
 
-// Händelsehanterare för när sidan laddad
+// Händelsehanterare för när sidan laddas
 window.onload = init;
+
+// Händelsehanterare för att ändra antal rader i listan
+numRowsEl.addEventListener("change", changeChannelsDisplay, false);
 
 // Initierings-funktion
 function init() {
@@ -22,14 +23,18 @@ function init() {
     // Anropar funktion som hämtar kanaler när sidan laddas
     getChannels();
 
+    // Döljer radiospelaren initerande
+    radioPlayerEl.style.display = "none";
+
 }
 
-// Funktion för att hämta kanaler från webbtjänst
-function getChannels() {
-    const url = "https://api.sr.se/v2/channels/?format=json&size=52"
+// Funktion för att hämta tablå för program som sänds just nu
+function getProgramsNow() {
+    // Deklarerar variabel för url:en till aktuell tablå
+    let programsNowUrl = "https://api.sr.se/api/v2/scheduledepisodes/rightnow?format=json&indent=true&size=100"
 
-    // Anropar webbtjänsten genom fetch-API. Hämtar url, ger tillbaka svaret i json.
-    fetch(url)
+    // Anropar webbtjänsten genom fetch-API, hämtar url
+    fetch(programsNowUrl)
         // Konrollerar att response är ok, returnerar svaret i json
         .then(response => {
             if (response.ok) {
@@ -37,15 +42,37 @@ function getChannels() {
             }
         })
         // Anropar funktion med kanaler från data som argument
+        .then(data => displayProgramsNow(data.channels))
+        // Hämtar eventuella fel
+        .catch(error => console.log(error));
+}
+
+// Funktion för att hämta kanaler från webbtjänst
+function getChannels() {
+    let channelUrl = "https://api.sr.se/v2/channels/?format=json&size=100"
+
+    // Anropar webbtjänsten genom fetch-API, hämtar url
+    fetch(channelUrl)
+        // Konrollerar att response är ok, returnerar svaret i json
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+        })
+
+        // Anropar funktion med kanaler från data som argument
         .then(data => displayChannelNames(data.channels))
+
         // Hämtar eventuella fel
         .catch(error => console.log(error));
 }
 
 // Funktion för att hämta kanalernas namn och skriva ut till DOM
 function displayChannelNames(channels) {
+
     // Loopar igenom och skapar listobjekt för varje kanal
     channels.forEach(channel => {
+
         // Kontrollerar om kanalen har en tablå och inte är av typen "Extrakanaler"
         if (channel.scheduleurl && channel.channeltype !== "Extrakanaler") {
             // Skapar ett nytt listobjekt (li)
@@ -62,45 +89,80 @@ function displayChannelNames(channels) {
                 newListEl.title = channel.tagline; // Ändrar listobjektens titel genom att hämta tagline från kanalen
             });
 
-            // Lägg till en klickhändelsehanterare för listobjekt vid klick, anonym arrow-funktion
+            // Lägger till en klickhändelsehanterare för listobjekt vid klick, anonym arrow-funktion
             newListEl.addEventListener("click", () => {
+
                 // Deklarerar variabel för kanalernas tablåer i JSON-format
                 let scheduleJson = `${channel.scheduleurl}&format=json&size=10000`;
-                // Anropar funktionen getcheduele med kanalernas tablåschema (URL) som argument
+
+                // Anropar funktionen getScheduele med kanalernas tablåschema (URL) som argument
                 getSchedule(scheduleJson);
             });
+
+            // Lägger till li-element i listItems [tom array]
+            listItems.push(newListEl);
         }
     });
+
+    // Anropar funktion för att ändra antalet kanaler i listan
+    changeChannelsDisplay();
+}
+
+// Funktion för att ändra antalet kanaler som visas i listan
+function changeChannelsDisplay() {
+    // Deklarerar variabel för max antal kanaler som värdet i input-fältet
+    let maxChannels = numRowsEl.value;
+
+    // Loopar igenom listan så länge det finns värden i listan
+    for (let i = 0; i < listItems.length; i++) {
+
+        // Kontrollerar om index är mindre än värdet i inputfältet, visar list-elementen
+        if (i < maxChannels) {
+            listItems[i].style.display = "list-item";
+
+            // Om index är högre än värdet i inputfältet visas inte list-elementen
+        } else {
+            listItems[i].style.display = "none";
+        }
+    }
 }
 
 // Funktion för att hämta tablån för en specifik kanal
 function getSchedule(scheduleUrl) {
+
     // Nollställer innehållet i elementet innan en ny tablå hämtas
     infoEl.innerHTML = '';
 
     // Gör en ny fetch för att hämta tablån från url:en
     fetch(scheduleUrl)
+
         // Konrollerar att response är ok, returnerar svaret i json
         .then(response => {
             if (response.ok) {
                 return response.json();
             }
         })
+
         // Anropar funktion med tablå från data som argument
         .then(data => displaySchedule(data.schedule))
+
         // Hämtar eventuella fel
         .catch(error => console.log(error));
 }
 
 // Funktion för att visa tablån för specifik kanal
 function displaySchedule(schedule) {
+
     schedule.forEach(schedule => {
+
         // Deklarerat date-objekt med aktuellt datum
         let currentTime = new Date();
         // Deklarerat sluttid för program i tablåerna, konverterar datum
         let endTime = new Date(parseInt(schedule.endtimeutc.substr(6)));
+
         // Kontrollerar om det aktuellt datum/tid är mindre än eller lika med sluttiden för programmen i tablåerna. Visar programmen om de är pågående eller kommande
         if (currentTime <= endTime) {
+
             // Skapar nya element för artikel
             let newArticleEl = document.createElement("article");
 
@@ -109,7 +171,7 @@ function displaySchedule(schedule) {
             // Lägger till h3-element till artikel samt texten (titel) till h3.
             let newH3El = document.createElement("h3");
             let newH3Text = document.createTextNode(schedule.title);
-            newArticleEl.appendChild(newH3El)
+            newArticleEl.appendChild(newH3El);
             newH3El.appendChild(newH3Text);
 
             // Kontrollerar om underrubrik finns
@@ -129,7 +191,7 @@ function displaySchedule(schedule) {
             // Lägger till h5-element till artikel samt texten (tid) till h5.
             let newH5El = document.createElement("h5");
             let newH5Text = document.createTextNode(convertDate(schedule.starttimeutc, schedule.endtimeutc));
-            newArticleEl.appendChild(newH5El)
+            newArticleEl.appendChild(newH5El);
             newH5El.appendChild(newH5Text);
 
             // Kontrollerar om beskrivning finns
@@ -144,10 +206,10 @@ function displaySchedule(schedule) {
                 newPEl.appendChild(newPText);
             }
 
-            // Lägger till artikel till infoEl-elementet
+            // Lägger till artikel till infoEl-elementet (skriver ut till DOM)
             infoEl.appendChild(newArticleEl);
         }
-    })
+    });
 }
 
 // Funktion för att ta emot och konvertera datum
