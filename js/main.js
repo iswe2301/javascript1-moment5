@@ -112,6 +112,19 @@ function displayProgramsNow(channels) {
                 newPEl.appendChild(newPText);
             }
 
+            // Kontrollerar om bild finns
+            if (channel.currentscheduledepisode.socialimage) {
+                // Skapar nytt img-element om bild finns
+                let newImageEl = document.createElement("img");
+                // Sätter källan till url:en från socialimage som hämtas ur tablån
+                newImageEl.src = channel.currentscheduledepisode.socialimage;
+                // Ändrar storlek på bilderna
+                newImageEl.width = 150;
+                newImageEl.height = 150;
+                // Lägger till bild till artikeln
+                newArticleEl.appendChild(newImageEl);
+            }
+
             // Lägger till artikel till sektions-elementet
             newSectionEl.appendChild(newArticleEl);
         }
@@ -315,6 +328,19 @@ function displaySchedule(schedule) {
                 newArticleEl.appendChild(newPEl);
                 // Lägger till p-texten till p-elementet om beskrivning finns
                 newPEl.appendChild(newPText);
+            }
+
+            // Kontrollerar om bild finns
+            if (schedule.imageurl) {
+                // Skapar ett nytt img-element om bild finns
+                let newImageEl = document.createElement("img");
+                // Sätter källan till url:en från imageurl som hämtas ur tablån
+                newImageEl.src = schedule.imageurl;
+                // Ändrar storlek på bilderna
+                newImageEl.width = 150;
+                newImageEl.height = 150;
+                // Lägger till img-elementet till artikeln
+                newArticleEl.appendChild(newImageEl);
             }
 
             // Lägger till artikel till infoEl-elementet (skriver ut till DOM)
