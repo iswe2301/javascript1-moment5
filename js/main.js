@@ -102,6 +102,28 @@ function displayChannelNames(channels) {
             // Lägger till li-element i listItems [tom array]
             listItems.push(newListEl);
         }
+
+        // Skapar nytt option-element
+        let newOptionEl = document.createElement("option");
+        // Lägger till ett value-attribut till option-elementet, hämtar url
+        newOptionEl.setAttribute("value", channel.liveaudio.url);
+        // Skapar text till option-element, hämtar kanalnamn
+        let newOptionText = document.createTextNode(channel.name);
+        // Lägger till kanalnamn till option-element
+        newOptionEl.appendChild(newOptionText);
+        // Lägger till option till playchannel-element (select-tagg)
+        playChannelEl.appendChild(newOptionEl);
+
+        // Lägger till händelsehanterare för klick på play-knappen, anonym arrowfunktion
+        playButtonEl.addEventListener("click", () => {
+
+            // Deklarerar variabel för kanalens url genom att hämta url från select-elementets värde
+            let selectedChannel = playChannelEl.value;
+
+            // Anropar funktion med kanalens url som argument
+            playChannel(selectedChannel);
+        });
+
     });
 
     // Anropar funktion för att ändra antalet kanaler i listan
@@ -125,6 +147,24 @@ function changeChannelsDisplay() {
             listItems[i].style.display = "none";
         }
     }
+}
+
+// Deklarerar en global ljudspelare genom att skapa ett audio-element
+let audioPlayerEl = document.createElement("audio");
+// Skapar attribut för audio-kontroller och autoplay
+audioPlayerEl.setAttribute("controls", true);
+audioPlayerEl.setAttribute("autoplay", true);
+// Lägger till ljudspelaren till radioplayer (Skriver ut till DOM)
+radioPlayerEl.appendChild(audioPlayerEl);
+
+// Funktion för att spela kanalers live-radio
+function playChannel(url) {
+    // Visar spelaren
+    radioPlayerEl.style.display = "block";
+    // Sätter källan till kanalens url (skickas som argument i funktionen genom händelsehanteraren)
+    audioPlayerEl.src = url;
+    // Sätter attribut för filtyp
+    audioPlayerEl.setAttribute("type", "audio/mpeg")
 }
 
 // Funktion för att hämta tablån för en specifik kanal
