@@ -20,6 +20,9 @@ numRowsEl.addEventListener("change", changeChannelsDisplay, false);
 // Initierings-funktion
 function init() {
 
+    // Anropar funktion som hämtar program som sänds just nu
+    getProgramsNow();
+
     // Anropar funktion som hämtar kanaler när sidan laddas
     getChannels();
 
@@ -45,6 +48,74 @@ function getProgramsNow() {
         .then(data => displayProgramsNow(data.channels))
         // Hämtar eventuella fel
         .catch(error => console.log(error));
+}
+
+// Funktion för att hämta programinfo som sänds just nu och skriva ut till DOM
+function displayProgramsNow(channels) {
+    // Skapar nytt element för sektion
+    let newSectionEl = document.createElement("section");
+    // Skapar nytt element för h2
+    // Skapar ny textnod för h2
+    // Lägger till h2-element till sektion samt texten till h2.
+    // Lägger till sektion till infoEl (skriver ut till DOM).
+    let newH2El = document.createElement("h2");
+    let newH2Text = document.createTextNode("Program just nu:");
+    newSectionEl.appendChild(newH2El);
+    newH2El.appendChild(newH2Text);
+    infoEl.appendChild(newSectionEl);
+
+    // Loopar igenom och skapar nya element för varje del
+    channels.forEach(channel => {
+        // Kontrollerar om aktuellt tablåprogram finns
+        if (channel.currentscheduledepisode) {
+
+            // Skapar nytt element för artikel
+            let newArticleEl = document.createElement("article");
+
+            // Skapar nytt element för h3
+            // Skapar ny textnod för h3 genom att hämta titel från tablå
+            // Lägger till h3-element till artikel samt texten (titel) till h3.
+            let newH3El = document.createElement("h3");
+            let newH3Text = document.createTextNode(channel.currentscheduledepisode.title);
+            newArticleEl.appendChild(newH3El);
+            newH3El.appendChild(newH3Text);
+
+            // Kontrollerar om underrubrik finns
+            if (channel.currentscheduledepisode.subtitle) {
+                // Skapar nytt element för h4 om underrubrik finns
+                let newH4El = document.createElement("h4");
+                // Skapar ny textnod för H4-elementet om underrubrik finns, hämtas från tablå
+                let newH4Text = document.createTextNode(channel.currentscheduledepisode.subtitle);
+                // Lägger till h4-elementet till artikeln om underrubrik finns
+                newArticleEl.appendChild(newH4El);
+                // Lägger till h4-texten till h4 om underrubrik finns
+                newH4El.appendChild(newH4Text);
+            }
+
+            // Skapar nytt element för h5
+            // Skapar ny textnod för h5 genom att hämta tid från tablå, anropar funktion som konverterar tiden
+            // Lägger till h5-element till artikel samt texten (tid) till h5.
+            let newH5El = document.createElement("h5");
+            let newH5Text = document.createTextNode(convertDate(channel.currentscheduledepisode.starttimeutc, channel.currentscheduledepisode.endtimeutc));
+            newArticleEl.appendChild(newH5El);
+            newH5El.appendChild(newH5Text);
+
+            // Kontrollerar om beskrivning finns
+            if (channel.currentscheduledepisode.description) {
+                // Skapar nytt element för p om beskrivning finns
+                let newPEl = document.createElement("p");
+                // Skapar ny textnod för p-elementet om beskrivning finns, hämtas från tablå
+                let newPText = document.createTextNode(channel.currentscheduledepisode.description);
+                // Lägger till p-elementet till artikeln om beskrivning finns
+                newArticleEl.appendChild(newPEl);
+                // Lägger till p-texten till p-elementet om beskrivning finns
+                newPEl.appendChild(newPText);
+            }
+
+            // Lägger till artikel till sektions-elementet
+            newSectionEl.appendChild(newArticleEl);
+        }
+    });
 }
 
 // Funktion för att hämta kanaler från webbtjänst
