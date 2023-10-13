@@ -9,6 +9,7 @@ let playChannelEl = document.getElementById("playchannel");
 let playButtonEl = document.getElementById("playbutton");
 let radioPlayerEl = document.getElementById("radioplayer");
 let numRowsEl = document.getElementById("numrows");
+let logoEl = document.getElementById("logo");
 let listItems = []; // Tom array för att lägga in li-element
 
 // Händelsehanterare för när sidan laddas
@@ -16,6 +17,14 @@ window.onload = init;
 
 // Händelsehanterare för att ändra antal rader i listan
 numRowsEl.addEventListener("change", changeChannelsDisplay, false);
+
+// Händelsehanterare för att ladda om sidan vid klick
+logoEl.addEventListener('click', refreshPage, false);
+
+// Funktion för att ladda om sidan genom location-objekt (sidans URL)
+function refreshPage() {
+    location.reload();
+}
 
 // Initierings-funktion
 function init() {
