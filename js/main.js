@@ -2,7 +2,7 @@
 
 "use strict";
 
-// Variabler (lagrar element)
+// Deklarerar variabler, hämtar genom ID
 let mainnavlistEl = document.getElementById("mainnavlist");
 let infoEl = document.getElementById("info");
 let playChannelEl = document.getElementById("playchannel");
@@ -40,106 +40,6 @@ function init() {
 
 }
 
-// Funktion för att hämta tablå för program som sänds just nu
-function getProgramsNow() {
-    // Deklarerar variabel för url:en till aktuell tablå
-    let programsNowUrl = "https://api.sr.se/api/v2/scheduledepisodes/rightnow?format=json&indent=true&size=100"
-
-    // Anropar webbtjänsten genom fetch-API, hämtar url
-    fetch(programsNowUrl)
-        // Konrollerar att response är ok, returnerar svaret i json
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            }
-        })
-        // Anropar funktion med kanaler från data som argument
-        .then(data => displayProgramsNow(data.channels))
-        // Hämtar eventuella fel
-        .catch(error => console.log(error));
-}
-
-// Funktion för att hämta programinfo som sänds just nu och skriva ut till DOM
-function displayProgramsNow(channels) {
-    // Skapar nytt element för sektion
-    let newSectionEl = document.createElement("section");
-    // Skapar nytt element för h2
-    // Skapar ny textnod för h2
-    // Lägger till h2-element till sektion samt texten till h2.
-    // Lägger till sektion till infoEl (skriver ut till DOM).
-    let newH2El = document.createElement("h2");
-    let newH2Text = document.createTextNode("Program just nu:");
-    newSectionEl.appendChild(newH2El);
-    newH2El.appendChild(newH2Text);
-    infoEl.appendChild(newSectionEl);
-
-    // Loopar igenom och skapar nya element för varje del
-    channels.forEach(channel => {
-        // Kontrollerar om aktuellt tablåprogram finns
-        if (channel.currentscheduledepisode) {
-
-            // Skapar nytt element för artikel
-            let newArticleEl = document.createElement("article");
-
-            // Skapar nytt element för h3
-            // Skapar ny textnod för h3 genom att hämta titel från tablå
-            // Lägger till h3-element till artikel samt texten (titel) till h3.
-            let newH3El = document.createElement("h3");
-            let newH3Text = document.createTextNode(channel.currentscheduledepisode.title);
-            newArticleEl.appendChild(newH3El);
-            newH3El.appendChild(newH3Text);
-
-            // Kontrollerar om underrubrik finns
-            if (channel.currentscheduledepisode.subtitle) {
-                // Skapar nytt element för h4 om underrubrik finns
-                let newH4El = document.createElement("h4");
-                // Skapar ny textnod för H4-elementet om underrubrik finns, hämtas från tablå
-                let newH4Text = document.createTextNode(channel.currentscheduledepisode.subtitle);
-                // Lägger till h4-elementet till artikeln om underrubrik finns
-                newArticleEl.appendChild(newH4El);
-                // Lägger till h4-texten till h4 om underrubrik finns
-                newH4El.appendChild(newH4Text);
-            }
-
-            // Skapar nytt element för h5
-            // Skapar ny textnod för h5 genom att hämta tid från tablå, anropar funktion som konverterar tiden
-            // Lägger till h5-element till artikel samt texten (tid) till h5.
-            let newH5El = document.createElement("h5");
-            let newH5Text = document.createTextNode(convertDate(channel.currentscheduledepisode.starttimeutc, channel.currentscheduledepisode.endtimeutc));
-            newArticleEl.appendChild(newH5El);
-            newH5El.appendChild(newH5Text);
-
-            // Kontrollerar om beskrivning finns
-            if (channel.currentscheduledepisode.description) {
-                // Skapar nytt element för p om beskrivning finns
-                let newPEl = document.createElement("p");
-                // Skapar ny textnod för p-elementet om beskrivning finns, hämtas från tablå
-                let newPText = document.createTextNode(channel.currentscheduledepisode.description);
-                // Lägger till p-elementet till artikeln om beskrivning finns
-                newArticleEl.appendChild(newPEl);
-                // Lägger till p-texten till p-elementet om beskrivning finns
-                newPEl.appendChild(newPText);
-            }
-
-            // Kontrollerar om bild finns
-            if (channel.currentscheduledepisode.socialimage) {
-                // Skapar nytt img-element om bild finns
-                let newImageEl = document.createElement("img");
-                // Sätter källan till url:en från socialimage som hämtas ur tablån
-                newImageEl.src = channel.currentscheduledepisode.socialimage;
-                // Ändrar storlek på bilderna
-                newImageEl.width = 150;
-                newImageEl.height = 150;
-                // Lägger till bild till artikeln
-                newArticleEl.appendChild(newImageEl);
-            }
-
-            // Lägger till artikel till sektions-elementet
-            newSectionEl.appendChild(newArticleEl);
-        }
-    });
-}
-
 // Funktion för att hämta kanaler från webbtjänst
 function getChannels() {
     let channelUrl = "https://api.sr.se/v2/channels/?format=json&size=100"
@@ -148,9 +48,7 @@ function getChannels() {
     fetch(channelUrl)
         // Konrollerar att response är ok, returnerar svaret i json
         .then(response => {
-            if (response.ok) {
-                return response.json();
-            }
+            return response.json();
         })
 
         // Anropar funktion med kanaler från data som argument
@@ -242,24 +140,6 @@ function changeChannelsDisplay() {
     }
 }
 
-// Deklarerar en global ljudspelare genom att skapa ett audio-element
-let audioPlayerEl = document.createElement("audio");
-// Skapar attribut för audio-kontroller och autoplay
-audioPlayerEl.setAttribute("controls", true);
-audioPlayerEl.setAttribute("autoplay", true);
-// Lägger till ljudspelaren till radioplayer (Skriver ut till DOM)
-radioPlayerEl.appendChild(audioPlayerEl);
-
-// Funktion för att spela kanalers live-radio
-function playChannel(url) {
-    // Visar spelaren
-    radioPlayerEl.style.display = "block";
-    // Sätter källan till kanalens url (skickas som argument i funktionen genom händelsehanteraren)
-    audioPlayerEl.src = url;
-    // Sätter attribut för filtyp
-    audioPlayerEl.setAttribute("type", "audio/mpeg")
-}
-
 // Funktion för att hämta tablån för en specifik kanal
 function getSchedule(scheduleUrl) {
 
@@ -271,9 +151,7 @@ function getSchedule(scheduleUrl) {
 
         // Konrollerar att response är ok, returnerar svaret i json
         .then(response => {
-            if (response.ok) {
-                return response.json();
-            }
+            return response.json();
         })
 
         // Anropar funktion med tablå från data som argument
@@ -358,10 +236,130 @@ function displaySchedule(schedule) {
     });
 }
 
-// Funktion för att ta emot och konvertera datum
+// Deklarerar en global ljudspelare genom att skapa ett audio-element
+let audioPlayerEl = document.createElement("audio");
+// Skapar attribut för audio-kontroller och autoplay
+audioPlayerEl.setAttribute("controls", true);
+audioPlayerEl.setAttribute("autoplay", true);
+// Lägger till ljudspelaren till radioplayer (Skriver ut till DOM)
+radioPlayerEl.appendChild(audioPlayerEl);
+
+// Funktion för att spela kanalers live-radio
+function playChannel(url) {
+    // Visar spelaren
+    radioPlayerEl.style.display = "block";
+    // Sätter källan till kanalens url (skickas som argument i funktionen genom händelsehanteraren)
+    audioPlayerEl.src = url;
+    // Sätter attribut för filtyp
+    audioPlayerEl.setAttribute("type", "audio/mpeg")
+}
+
+// Funktion för att hämta tablå för program som sänds just nu
+function getProgramsNow() {
+    // Deklarerar variabel för url:en till aktuell tablå
+    let programsNowUrl = "https://api.sr.se/api/v2/scheduledepisodes/rightnow?format=json&indent=true&size=100"
+
+    // Anropar webbtjänsten genom fetch-API, hämtar url
+    fetch(programsNowUrl)
+        // Konrollerar att response är ok, returnerar svaret i json
+        .then(response => {
+            return response.json();
+        })
+        // Anropar funktion med kanaler från data som argument
+        .then(data => displayProgramsNow(data.channels))
+        // Hämtar eventuella fel
+        .catch(error => console.log(error));
+}
+
+// Funktion för att hämta programinfo som sänds just nu och skriva ut till DOM
+function displayProgramsNow(channels) {
+    // Skapar nytt element för sektion
+    let newSectionEl = document.createElement("section");
+    // Skapar nytt element för h2
+    // Skapar ny textnod för h2
+    // Lägger till h2-element till sektion samt texten till h2.
+    // Lägger till sektion till infoEl (skriver ut till DOM).
+    let newH2El = document.createElement("h2");
+    let newH2Text = document.createTextNode("Program just nu:");
+    newSectionEl.appendChild(newH2El);
+    newH2El.appendChild(newH2Text);
+    infoEl.appendChild(newSectionEl);
+
+    // Loopar igenom och skapar nya element för varje del
+    channels.forEach(channel => {
+        // Kontrollerar om aktuellt tablåprogram finns
+        if (channel.currentscheduledepisode) {
+
+            // Skapar nytt element för artikel
+            let newArticleEl = document.createElement("article");
+
+            // Skapar nytt element för h3
+            // Skapar ny textnod för h3 genom att hämta titel från tablå
+            // Lägger till h3-element till artikel samt texten (titel) till h3.
+            let newH3El = document.createElement("h3");
+            let newH3Text = document.createTextNode(channel.currentscheduledepisode.title);
+            newArticleEl.appendChild(newH3El);
+            newH3El.appendChild(newH3Text);
+
+            // Kontrollerar om underrubrik finns
+            if (channel.currentscheduledepisode.subtitle) {
+                // Skapar nytt element för h4 om underrubrik finns
+                let newH4El = document.createElement("h4");
+                // Skapar ny textnod för H4-elementet om underrubrik finns, hämtas från tablå
+                let newH4Text = document.createTextNode(channel.currentscheduledepisode.subtitle);
+                // Lägger till h4-elementet till artikeln om underrubrik finns
+                newArticleEl.appendChild(newH4El);
+                // Lägger till h4-texten till h4 om underrubrik finns
+                newH4El.appendChild(newH4Text);
+            }
+
+            // Skapar nytt element för h5
+            // Skapar ny textnod för h5 genom att hämta tid från tablå, anropar funktion som konverterar tiden
+            // Lägger till h5-element till artikel samt texten (tid) till h5.
+            let newH5El = document.createElement("h5");
+            let newH5Text = document.createTextNode(convertDate(channel.currentscheduledepisode.starttimeutc, channel.currentscheduledepisode.endtimeutc));
+            newArticleEl.appendChild(newH5El);
+            newH5El.appendChild(newH5Text);
+
+            // Kontrollerar om beskrivning finns
+            if (channel.currentscheduledepisode.description) {
+                // Skapar nytt element för p om beskrivning finns
+                let newPEl = document.createElement("p");
+                // Skapar ny textnod för p-elementet om beskrivning finns, hämtas från tablå
+                let newPText = document.createTextNode(channel.currentscheduledepisode.description);
+                // Lägger till p-elementet till artikeln om beskrivning finns
+                newArticleEl.appendChild(newPEl);
+                // Lägger till p-texten till p-elementet om beskrivning finns
+                newPEl.appendChild(newPText);
+            }
+
+            // Kontrollerar om bild finns
+            if (channel.currentscheduledepisode.socialimage) {
+                // Skapar nytt img-element om bild finns
+                let newImageEl = document.createElement("img");
+                // Sätter källan till url:en från socialimage som hämtas ur tablån
+                newImageEl.src = channel.currentscheduledepisode.socialimage;
+                // Ändrar storlek på bilderna
+                newImageEl.width = 150;
+                newImageEl.height = 150;
+                // Lägger till bild till artikeln
+                newArticleEl.appendChild(newImageEl);
+            }
+
+            // Lägger till artikel till sektions-elementet
+            newSectionEl.appendChild(newArticleEl);
+        }
+    });
+}
+
+// Funktion för att ta emot och konvertera datum, två argument
 function convertDate(dateStr1, dateStr2) {
+    // Deklarerar variabler för date-objekt som konverterar datumsträng till heltal,
+    // hämtar datum från argument och använder funktionen sub-string för att endast hämta tecken från index 6 och framåt
     let tempDate1 = new Date(parseInt(dateStr1.substr(6)));
     let tempDate2 = new Date(parseInt(dateStr2.substr(6)));
+
+    // Deklarerar variabler för timmar och minuter genom att hämta från datumen
     let hours1 = tempDate1.getHours();
     let minutes1 = tempDate1.getMinutes();
     let hours2 = tempDate2.getHours();
@@ -386,6 +384,7 @@ function convertDate(dateStr1, dateStr2) {
         minutes2 = "0" + minutes2;
     }
 
+    // Deklarerar variabler för hur utskriften av timmar och minuter ska se ut
     let formattedTime1 = hours1 + ":" + minutes1;
     let formattedTime2 = hours2 + ":" + minutes2;
 
